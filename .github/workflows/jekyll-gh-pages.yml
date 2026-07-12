@@ -1,0 +1,77 @@
+# ============================================
+#  FINANÇAS 360 - DEPLOY PARA GITHUB PAGES
+#  Workflow otimizado para HTML/CSS/JS
+# ============================================
+
+name: Deploy Finanças 360 para GitHub Pages
+
+on:
+  # Executa quando houver push na branch main
+  push:
+    branches: ["main"]
+  
+  # Permite executar manualmente pela aba Actions
+  workflow_dispatch:
+
+# Permissões para deploy
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Cancelar deploy anterior se houver novo push
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  # ============================================
+  #  JOB DE BUILD (Preparar os arquivos)
+  # ============================================
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 1. Baixar o código do repositório
+      - name: 📥 Checkout do código
+        uses: actions/checkout@v4
+      
+      # 2. Configurar GitHub Pages
+      - name: ⚙️ Configurar Pages
+        uses: actions/configure-pages@v5
+      
+      # 3. Criar arquivo .nojekyll (evita processamento do Jekyll)
+      - name: 📄 Criar .nojekyll
+        run: touch ./_site/.nojekyll
+      
+      # 4. Preparar arquivos para deploy
+      - name: 📦 Preparar artefatos
+        run: |
+          mkdir -p _site
+          cp -r *.html *.css *.js _site/ 2>/dev/null || true
+          cp -r assets _site/ 2>/dev/null || true
+          cp -r images _site/ 2>/dev/null || true
+          # Se tiver outros arquivos, adicione aqui
+      
+      # 5. Fazer upload para GitHub Pages
+      - name: ☁️ Upload do artefato
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./_site
+
+  # ============================================
+  #  JOB DE DEPLOY (Publicar o site)
+  # ============================================
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    runs-on: ubuntu-latest
+    needs: build
+    
+    steps:
+      # Publicar o site
+      - name: 🚀 Deploy para GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
