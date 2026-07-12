@@ -10,14 +10,592 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- CSS -->
-    <link rel="stylesheet" href="style.css">
+    <style>
+        /* ============================================
+           RESET E CONFIGURAÇÕES GERAIS
+           ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #f0f2f5;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* ============================================
+           TELA DE LOGIN
+           ============================================ */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a237e, #0d47a1);
+        }
+
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-header i {
+            font-size: 50px;
+            color: #1a237e;
+            margin-bottom: 10px;
+        }
+
+        .login-header h2 {
+            color: #1a237e;
+            font-size: 28px;
+        }
+
+        .login-header p {
+            color: #666;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .login-body input {
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .login-body input:focus {
+            border-color: #1a237e;
+            outline: none;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #1a237e, #0d47a1);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-login:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 20px rgba(26, 35, 126, 0.3);
+        }
+
+        .login-info {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 12px;
+            color: #999;
+        }
+
+        /* ============================================
+           HEADER
+           ============================================ */
+        .header {
+            background: linear-gradient(135deg, #1a237e, #0d47a1);
+            color: white;
+            padding: 25px 30px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 300;
+        }
+
+        .header h1 i {
+            margin-right: 10px;
+        }
+
+        .usuario-info {
+            background: rgba(255,255,255,0.15);
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .saldo-total {
+            background: rgba(255,255,255,0.15);
+            padding: 12px 25px;
+            border-radius: 10px;
+            text-align: right;
+        }
+
+        .saldo-total small {
+            display: block;
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .saldo-total span {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .btn-sair {
+            background: #c62828 !important;
+            padding: 8px 20px !important;
+            font-size: 13px !important;
+        }
+
+        .btn-sair:hover {
+            background: #b71c1c !important;
+        }
+
+        /* ============================================
+           CARDS
+           ============================================ */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        }
+
+        .card h3 {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .card .valor {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1a237e;
+        }
+
+        .card .valor.verde { color: #2e7d32; }
+        .card .valor.vermelho { color: #c62828; }
+        .card .valor.azul { color: #0d47a1; }
+        .card .valor.roxo { color: #6a1b9a; }
+        .card .valor.laranja { color: #e65100; }
+        .card .valor.ciano { color: #00838f; }
+
+        .card .icone {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            font-size: 28px;
+            opacity: 0.15;
+        }
+
+        /* ============================================
+           PANELS / CARDS DE CONTEÚDO
+           ============================================ */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        @media (max-width: 900px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .panel h2 {
+            font-size: 18px;
+            color: #1a237e;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .panel h2 i {
+            font-size: 20px;
+        }
+
+        /* ============================================
+           FORMULÁRIOS
+           ============================================ */
+        .form-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .form-group input,
+        .form-group select {
+            flex: 1;
+            min-width: 120px;
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #1a237e;
+        }
+
+        /* ============================================
+           BOTÕES
+           ============================================ */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background: #1a237e;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .btn:hover {
+            background: #0d47a1;
+            transform: scale(1.02);
+        }
+
+        .btn-danger {
+            background: #c62828;
+        }
+
+        .btn-danger:hover {
+            background: #b71c1c;
+        }
+
+        .btn-success {
+            background: #2e7d32;
+        }
+
+        .btn-success:hover {
+            background: #1b5e20;
+        }
+
+        .btn-warning {
+            background: #e65100;
+        }
+
+        .btn-warning:hover {
+            background: #bf360c;
+        }
+
+        .btn-sm {
+            padding: 5px 12px;
+            font-size: 12px;
+        }
+
+        /* ============================================
+           FILTROS
+           ============================================ */
+        .filtro-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .filtro-group select {
+            padding: 8px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 13px;
+            background: white;
+        }
+
+        /* ============================================
+           TABELA
+           ============================================ */
+        .table-wrap {
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th {
+            background: #f5f5f5;
+            text-align: left;
+            padding: 12px 10px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        tr:hover td {
+            background: #fafafa;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 30px 0;
+        }
+
+        .empty-state i {
+            font-size: 40px;
+            margin-bottom: 10px;
+            opacity: 0.5;
+        }
+
+        /* ============================================
+           BADGES
+           ============================================ */
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-badge.pago { background: #c8e6c9; color: #1b5e20; }
+        .status-badge.pendente { background: #ffecb3; color: #e65100; }
+        .status-badge.atrasado { background: #ffcdd2; color: #b71c1c; }
+
+        .classificacao-badge {
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .classificacao-badge.essencial { background: #e3f2fd; color: #0d47a1; }
+        .classificacao-badge.hobby { background: #f3e5f5; color: #6a1b9a; }
+        .classificacao-badge.investimento { background: #e8f5e9; color: #1b5e20; }
+        .classificacao-badge.passivo { background: #ffebee; color: #b71c1c; }
+        .classificacao-badge.ativo { background: #fff3e0; color: #e65100; }
+        .classificacao-badge.renda { background: #e0f7fa; color: #00838f; }
+
+        .recorrencia-info {
+            font-size: 12px;
+            color: #666;
+            background: #f5f5f5;
+            padding: 2px 8px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        /* ============================================
+           GRÁFICOS
+           ============================================ */
+        .chart-container {
+            position: relative;
+            height: 250px;
+            margin: 10px 0;
+        }
+
+        /* ============================================
+           CRESCIMENTO
+           ============================================ */
+        .crescimento {
+            background: #e8eaf6;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .crescimento .numero {
+            font-size: 32px;
+            font-weight: bold;
+            color: #1a237e;
+        }
+
+        .crescimento .label {
+            font-size: 14px;
+            color: #555;
+        }
+
+        .crescimento .positivo { color: #2e7d32; }
+        .crescimento .negativo { color: #c62828; }
+
+        /* ============================================
+           DÍVIDAS
+           ============================================ */
+        .divida-item {
+            background: #f8f9fa;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .divida-item .info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .divida-item .info .nome {
+            font-weight: 600;
+            color: #1a237e;
+        }
+
+        .divida-item .info .detalhe {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .divida-item .valor-divida {
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        /* ============================================
+           FOOTER
+           ============================================ */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 13px;
+            margin-top: 20px;
+        }
+
+        /* ============================================
+           RESPONSIVIDADE
+           ============================================ */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .header-left {
+                justify-content: center;
+            }
+            
+            .header-right {
+                justify-content: center;
+                width: 100%;
+            }
+            
+            .saldo-total {
+                width: 100%;
+                text-align: center;
+            }
+            
+            .cards-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .login-box {
+                margin: 20px;
+                padding: 30px 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-group input,
+            .form-group select {
+                min-width: 100%;
+            }
+            
+            .header h1 {
+                font-size: 20px;
+            }
+            
+            .saldo-total span {
+                font-size: 22px;
+            }
+        }
+    </style>
 </head>
 <body>
-  
 
-
-  
 <!-- ========== TELA DE LOGIN ========== -->
 <div id="loginScreen" class="login-container">
     <div class="login-box">
@@ -225,12 +803,711 @@
 </div>
 </div>
 
-<!-- ========== JAVASCRIPT ========== -->
-<script src="script.js"></script>
+<!-- ============================================
+     JAVASCRIPT COMPLETO
+     ============================================ -->
+<script>
+// ============================================
+//  FINANÇAS 360 - SCRIPT COMPLETO
+//  VERSÃO COMPARTILHADA COM SUPABASE
+// ============================================
 
+// ============================================
+//  CONFIGURAÇÃO DO SUPABASE
+//  ⚠️ SUBSTITUA COM SUAS CHAVES!
+// ============================================
+const SUPABASE_URL = 'https://SEU_PROJETO.supabase.co';  // ← COLE SUA URL AQUI
+const SUPABASE_KEY = 'sb_publishable_ZEEte6NThw6ZK9i0xltOyQ_18hC7B0g';  // ← COLE SUA CHAVE AQUI
 
+// INICIALIZAR SUPABASE (USANDO A VARIÁVEL GLOBAL 'supabase')
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// ============================================
+//  VARIÁVEIS GLOBAIS
+// ============================================
+let usuarioAtual = null;
+let transacoes = [];
+let dividas = [];
+let filtroClassificacao = 'todos';
+let filtroTipo = 'todos';
+let pieChart = null;
+let barChart = null;
 
-  
+// ============================================
+//  LOGIN / LOGOUT
+// ============================================
+async function fazerLogin() {
+    const nome = document.getElementById('loginUsuario').value.trim();
+    const senha = document.getElementById('loginSenha').value.trim();
+
+    if (!nome || !senha) {
+        alert('Digite seu nome e senha!');
+        return;
+    }
+
+    try {
+        const { data: usuarios, error: buscaError } = await supabaseClient
+            .from('usuarios')
+            .select('*')
+            .eq('nome', nome)
+            .eq('senha', senha);
+
+        if (buscaError) {
+            alert('Erro ao buscar usuário: ' + buscaError.message);
+            return;
+        }
+
+        let usuario;
+
+        if (usuarios && usuarios.length > 0) {
+            usuario = usuarios[0];
+        } else {
+            const { data: novoUsuario, error: createError } = await supabaseClient
+                .from('usuarios')
+                .insert([{ nome, senha }])
+                .select();
+
+            if (createError) {
+                alert('Erro ao criar usuário: ' + createError.message);
+                return;
+            }
+            usuario = novoUsuario[0];
+        }
+
+        usuarioAtual = usuario;
+
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('mainContent').style.display = 'block';
+        document.getElementById('nomeUsuario').textContent = usuarioAtual.nome;
+
+        await carregarDados();
+        atualizarUI();
+
+    } catch (erro) {
+        alert('Erro ao fazer login: ' + erro.message);
+    }
+}
+
+function fazerLogout() {
+    usuarioAtual = null;
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('mainContent').style.display = 'none';
+    document.getElementById('loginUsuario').value = '';
+    document.getElementById('loginSenha').value = '';
+}
+
+// ============================================
+//  CARREGAR DADOS DO SUPABASE
+// ============================================
+async function carregarDados() {
+    if (!usuarioAtual) return;
+
+    try {
+        const { data: transacoesData, error: transError } = await supabaseClient
+            .from('transacoes')
+            .select('*')
+            .eq('usuario', usuarioAtual.nome)
+            .order('id', { ascending: false });
+
+        if (transError) throw transError;
+        transacoes = transacoesData || [];
+
+        const { data: dividasData, error: divError } = await supabaseClient
+            .from('dividas')
+            .select('*')
+            .eq('usuario', usuarioAtual.nome)
+            .order('id', { ascending: false });
+
+        if (divError) throw divError;
+        dividas = dividasData || [];
+
+        console.log(`✅ Dados carregados: ${transacoes.length} transações, ${dividas.length} dívidas`);
+
+    } catch (erro) {
+        console.error('❌ Erro ao carregar dados:', erro);
+        alert('Erro ao carregar dados: ' + erro.message);
+    }
+}
+
+// ============================================
+//  SALVAR NO SUPABASE
+// ============================================
+async function salvarTransacao(transacao) {
+    if (!usuarioAtual) return null;
+    transacao.usuario = usuarioAtual.nome;
+
+    const { data, error } = await supabaseClient
+        .from('transacoes')
+        .insert([transacao])
+        .select();
+
+    if (error) {
+        alert('Erro ao salvar transação: ' + error.message);
+        return null;
+    }
+    return data[0];
+}
+
+async function salvarDivida(divida) {
+    if (!usuarioAtual) return null;
+    divida.usuario = usuarioAtual.nome;
+
+    const { data, error } = await supabaseClient
+        .from('dividas')
+        .insert([divida])
+        .select();
+
+    if (error) {
+        alert('Erro ao salvar dívida: ' + error.message);
+        return null;
+    }
+    return data[0];
+}
+
+async function deletarTransacao(id) {
+    if (!usuarioAtual) return;
+
+    const { error } = await supabaseClient
+        .from('transacoes')
+        .delete()
+        .eq('id', id);
+
+    if (error) {
+        alert('Erro ao deletar transação: ' + error.message);
+    }
+}
+
+async function deletarDivida(id) {
+    if (!usuarioAtual) return;
+
+    const { error } = await supabaseClient
+        .from('dividas')
+        .delete()
+        .eq('id', id);
+
+    if (error) {
+        alert('Erro ao deletar dívida: ' + error.message);
+    }
+}
+
+async function atualizarDivida(id, dados) {
+    if (!usuarioAtual) return;
+
+    const { error } = await supabaseClient
+        .from('dividas')
+        .update(dados)
+        .eq('id', id);
+
+    if (error) {
+        alert('Erro ao atualizar dívida: ' + error.message);
+    }
+}
+
+// ============================================
+//  FUNÇÕES DE CÁLCULO
+// ============================================
+function calcularTotais() {
+    let receitas = 0, despesas = 0;
+    let ativos = 0, passivos = 0;
+    let renda = 0;
+
+    transacoes.forEach(t => {
+        if (t.tipo === 'receita') {
+            receitas += t.valor;
+            if (t.classificacao === 'ativo') ativos += t.valor;
+            if (t.classificacao === 'renda') renda += t.valor;
+        } else {
+            despesas += t.valor;
+            if (t.classificacao === 'passivo') passivos += t.valor;
+        }
+    });
+
+    const saldo = receitas - despesas;
+    const totalDividas = dividas.reduce((acc, d) => acc + d.valor, 0);
+    const patrimonio = ativos - passivos - totalDividas;
+
+    return { receitas, despesas, saldo, totalDividas, patrimonio, ativos, passivos, renda };
+}
+
+function calcularCrescimento() {
+    const { receitas, despesas } = calcularTotais();
+    if (receitas === 0 && despesas === 0) return 0;
+    if (despesas === 0) return 100;
+    return ((receitas - despesas) / (despesas || 1)) * 100;
+}
+
+// ============================================
+//  FUNÇÕES DE UI
+// ============================================
+function getClassificacaoLabel(classificacao) {
+    const labels = {
+        'essencial': 'Gastos Essenciais',
+        'hobby': 'Hobbies',
+        'investimento': 'Investimentos',
+        'passivo': 'Passivos',
+        'ativo': 'Ativos',
+        'renda': 'Renda'
+    };
+    return labels[classificacao] || classificacao;
+}
+
+function getClassificacaoBadge(classificacao) {
+    return `<span class="classificacao-badge ${classificacao}">${getClassificacaoLabel(classificacao)}</span>`;
+}
+
+// ============================================
+//  ATUALIZAR UI
+// ============================================
+function atualizarUI() {
+    const { receitas, despesas, saldo, totalDividas, patrimonio, renda } = calcularTotais();
+    const crescimento = calcularCrescimento();
+
+    document.getElementById('saldoTotal').textContent = `R$ ${saldo.toFixed(2)}`;
+    document.getElementById('totalReceitas').textContent = `R$ ${receitas.toFixed(2)}`;
+    document.getElementById('totalDespesas').textContent = `R$ ${despesas.toFixed(2)}`;
+    document.getElementById('totalDividas').textContent = `R$ ${totalDividas.toFixed(2)}`;
+    document.getElementById('patrimonio').textContent = `R$ ${patrimonio.toFixed(2)}`;
+    document.getElementById('rendaTotal').textContent = `R$ ${renda.toFixed(2)}`;
+
+    const cresStr = crescimento >= 0 ? `+${crescimento.toFixed(1)}%` : `${crescimento.toFixed(1)}%`;
+    document.getElementById('crescimentoCard').textContent = cresStr;
+    document.getElementById('crescimentoCard').className = `valor ${crescimento >= 0 ? 'verde' : 'vermelho'}`;
+    document.getElementById('crescimentoIndice').textContent = cresStr;
+    document.getElementById('crescimentoIndice').className = `numero ${crescimento >= 0 ? 'positivo' : 'negativo'}`;
+
+    renderizarTabela();
+    renderizarDividas();
+    atualizarGraficos();
+}
+
+// ============================================
+//  TABELA DE TRANSAÇÕES
+// ============================================
+function renderizarTabela() {
+    let filtered = [...transacoes];
+
+    if (filtroClassificacao !== 'todos') {
+        filtered = filtered.filter(t => t.classificacao === filtroClassificacao);
+    }
+    if (filtroTipo !== 'todos') {
+        filtered = filtered.filter(t => t.tipo === filtroTipo);
+    }
+
+    const tabelaBody = document.getElementById('tabelaBody');
+
+    if (filtered.length === 0) {
+        tabelaBody.innerHTML = `<tr><td colspan="7" class="empty-state">
+            <i class="fas fa-inbox"></i><br>Nenhum lançamento encontrado
+        </td></tr>`;
+        return;
+    }
+
+    let html = '';
+    filtered.forEach(t => {
+        const recorrenciaInfo = t.recorrencia ? `${t.recorrencia} meses` : 'Único';
+        const tipoIcon = t.tipo === 'receita' ? '📈' : '📉';
+        const tipoCor = t.tipo === 'receita' ? '#2e7d32' : '#c62828';
+        const tipoLabel = t.tipo === 'receita' ? 'Receita' : 'Despesa';
+
+        html += `
+            <tr>
+                <td><strong>${t.descricao}</strong></td>
+                <td>${t.categoria}</td>
+                <td>${getClassificacaoBadge(t.classificacao)}</td>
+                <td><strong>R$ ${t.valor.toFixed(2)}</strong></td>
+                <td><span style="color:${tipoCor}">${tipoIcon} ${tipoLabel}</span></td>
+                <td><span class="recorrencia-info"><i class="far fa-clock"></i> ${recorrenciaInfo}</span></td>
+                <td>
+                    <button class="btn btn-danger btn-sm" onclick="removerTransacao(${t.id})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+    tabelaBody.innerHTML = html;
+}
+
+async function removerTransacao(id) {
+    if (!confirm('Tem certeza que deseja remover este lançamento?')) return;
+
+    await deletarTransacao(id);
+    transacoes = transacoes.filter(t => t.id !== id);
+    await carregarDados();
+    atualizarUI();
+}
+
+// ============================================
+//  DÍVIDAS
+// ============================================
+function renderizarDividas() {
+    const listaDividas = document.getElementById('listaDividas');
+
+    if (dividas.length === 0) {
+        listaDividas.innerHTML = `<div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <p>Nenhuma dívida cadastrada</p>
+        </div>`;
+        return;
+    }
+
+    let html = '';
+    dividas.forEach(d => {
+        const statusClass = d.status === 'pago' ? 'pago' : d.status === 'atrasado' ? 'atrasado' : 'pendente';
+        const statusLabel = d.status === 'pago' ? '✅ Pago' : d.status === 'atrasado' ? '⚠️ Atrasado' : '⏳ Pendente';
+        const recorrenciaInfo = d.recorrencia ? `${d.recorrencia} meses` : 'Único';
+        const vencimentoFormatado = d.vencimento ? new Date(d.vencimento).toLocaleDateString('pt-BR') : 'Não definido';
+
+        html += `
+            <div class="divida-item">
+                <div class="info">
+                    <span class="nome">${d.descricao}</span>
+                    <span class="detalhe">
+                        <i class="far fa-calendar-alt"></i> Venc: ${vencimentoFormatado} • 
+                        <span class="status-badge ${statusClass}">${statusLabel}</span> • 
+                        <i class="far fa-clock"></i> ${recorrenciaInfo}
+                    </span>
+                </div>
+                <div class="valor-divida">R$ ${d.valor.toFixed(2)}</div>
+                <div class="actions">
+                    <button class="btn btn-success btn-sm" onclick="mudarStatusDivida(${d.id}, 'pago')" title="Marcar como pago">
+                        <i class="fas fa-check"></i>
+                    </button>
+                    <button class="btn btn-sm" style="background:#ff9800;color:#fff;" onclick="mudarStatusDivida(${d.id}, 'pendente')" title="Marcar como pendente">
+                        <i class="fas fa-clock"></i>
+                    </button>
+                    <button class="btn btn-danger btn-sm" onclick="removerDivida(${d.id})" title="Excluir dívida">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+    });
+    listaDividas.innerHTML = html;
+}
+
+async function mudarStatusDivida(id, novoStatus) {
+    await atualizarDivida(id, { status: novoStatus });
+    const d = dividas.find(item => item.id === id);
+    if (d) d.status = novoStatus;
+    await carregarDados();
+    atualizarUI();
+}
+
+async function removerDivida(id) {
+    if (!confirm('Tem certeza que deseja remover esta dívida?')) return;
+
+    await deletarDivida(id);
+    dividas = dividas.filter(d => d.id !== id);
+    await carregarDados();
+    atualizarUI();
+}
+
+// ============================================
+//  GRÁFICOS
+// ============================================
+function atualizarGraficos() {
+    // GRÁFICO DE PIZZA
+    const classificacoes = {};
+    transacoes.forEach(t => {
+        if (t.tipo === 'despesa') {
+            const label = getClassificacaoLabel(t.classificacao);
+            classificacoes[label] = (classificacoes[label] || 0) + t.valor;
+        }
+    });
+
+    const pieLabels = Object.keys(classificacoes);
+    const pieData = Object.values(classificacoes);
+    const cores = ['#42A5F5', '#AB47BC', '#66BB6A', '#EF5350', '#FFA726', '#26C6DA'];
+
+    const ctxPie = document.getElementById('pieChart').getContext('2d');
+    if (pieChart) pieChart.destroy();
+
+    if (pieLabels.length === 0) {
+        pieChart = new Chart(ctxPie, {
+            type: 'pie',
+            data: {
+                labels: ['Sem dados'],
+                datasets: [{
+                    data: [1],
+                    backgroundColor: ['#e0e0e0']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+    } else {
+        pieChart = new Chart(ctxPie, {
+            type: 'pie',
+            data: {
+                labels: pieLabels,
+                datasets: [{
+                    data: pieData,
+                    backgroundColor: cores.slice(0, pieLabels.length),
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                let percentage = ((context.parsed / total) * 100).toFixed(1);
+                                return context.label + ': R$ ' + context.parsed.toFixed(2) + ' (' + percentage + '%)';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // GRÁFICO DE BARRAS
+    const ctxBar = document.getElementById('barChart').getContext('2d');
+    if (barChart) barChart.destroy();
+
+    const classificacoesUnicas = ['essencial', 'hobby', 'investimento', 'passivo', 'ativo', 'renda'];
+    const receitasPorClass = {};
+    const despesasPorClass = {};
+
+    classificacoesUnicas.forEach(c => {
+        receitasPorClass[c] = 0;
+        despesasPorClass[c] = 0;
+    });
+
+    transacoes.forEach(t => {
+        if (t.tipo === 'receita') {
+            receitasPorClass[t.classificacao] = (receitasPorClass[t.classificacao] || 0) + t.valor;
+        } else {
+            despesasPorClass[t.classificacao] = (despesasPorClass[t.classificacao] || 0) + t.valor;
+        }
+    });
+
+    const labels = classificacoesUnicas.map(c => getClassificacaoLabel(c));
+    const receitasData = classificacoesUnicas.map(c => receitasPorClass[c] || 0);
+    const despesasData = classificacoesUnicas.map(c => despesasPorClass[c] || 0);
+
+    barChart = new Chart(ctxBar, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Receitas',
+                    data: receitasData,
+                    backgroundColor: 'rgba(46, 125, 50, 0.7)',
+                    borderColor: '#2e7d32',
+                    borderWidth: 2
+                },
+                {
+                    label: 'Despesas',
+                    data: despesasData,
+                    backgroundColor: 'rgba(198, 40, 40, 0.7)',
+                    borderColor: '#c62828',
+                    borderWidth: 2
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'top' },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': R$ ' + context.parsed.y.toFixed(2);
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return 'R$ ' + value.toFixed(2);
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// ============================================
+//  FILTROS
+// ============================================
+function aplicarFiltros() {
+    filtroClassificacao = document.getElementById('filtroClassificacao').value;
+    filtroTipo = document.getElementById('filtroTipo').value;
+    renderizarTabela();
+}
+
+function limparFiltros() {
+    document.getElementById('filtroClassificacao').value = 'todos';
+    document.getElementById('filtroTipo').value = 'todos';
+    filtroClassificacao = 'todos';
+    filtroTipo = 'todos';
+    renderizarTabela();
+}
+
+// ============================================
+//  ADICIONAR TRANSAÇÃO
+// ============================================
+async function adicionarTransacao() {
+    const descricao = document.getElementById('descricao').value.trim();
+    const valor = parseFloat(document.getElementById('valor').value);
+    const tipo = document.getElementById('tipo').value;
+    const categoria = document.getElementById('categoria').value;
+    const classificacao = document.getElementById('classificacao').value;
+    const recorrencia = parseInt(document.getElementById('recorrencia').value) || 0;
+
+    if (!descricao || isNaN(valor) || valor <= 0) {
+        alert('⚠️ Preencha todos os campos corretamente!');
+        return;
+    }
+
+    const transacao = {
+        descricao,
+        valor,
+        tipo,
+        categoria,
+        classificacao,
+        recorrencia: recorrencia > 0 ? recorrencia : 0,
+        data: new Date().toISOString().split('T')[0]
+    };
+
+    const saved = await salvarTransacao(transacao);
+    if (saved) {
+        transacoes.push(saved);
+
+        if (recorrencia > 1) {
+            for (let i = 1; i < recorrencia; i++) {
+                const dataCopy = new Date();
+                dataCopy.setMonth(dataCopy.getMonth() + i);
+                const copy = {
+                    ...transacao,
+                    data: dataCopy.toISOString().split('T')[0],
+                    recorrencia: 0
+                };
+                const savedCopy = await salvarTransacao(copy);
+                if (savedCopy) transacoes.push(savedCopy);
+            }
+        }
+    }
+
+    document.getElementById('descricao').value = '';
+    document.getElementById('valor').value = '';
+    document.getElementById('recorrencia').value = '';
+
+    await carregarDados();
+    atualizarUI();
+}
+
+// ============================================
+//  ADICIONAR DÍVIDA
+// ============================================
+async function adicionarDivida() {
+    const descricao = document.getElementById('dividaDesc').value.trim();
+    const valor = parseFloat(document.getElementById('dividaValor').value);
+    const vencimento = document.getElementById('dividaVenc').value;
+    const status = document.getElementById('dividaStatus').value;
+    const recorrencia = parseInt(document.getElementById('dividaRecorrencia').value) || 0;
+
+    if (!descricao || isNaN(valor) || valor <= 0) {
+        alert('⚠️ Preencha todos os campos da dívida!');
+        return;
+    }
+
+    const divida = {
+        descricao,
+        valor,
+        vencimento,
+        status,
+        recorrencia: recorrencia > 0 ? recorrencia : 0
+    };
+
+    const saved = await salvarDivida(divida);
+    if (saved) {
+        dividas.push(saved);
+
+        if (recorrencia > 1) {
+            for (let i = 1; i < recorrencia; i++) {
+                const dataCopy = new Date(vencimento);
+                dataCopy.setMonth(dataCopy.getMonth() + i);
+                const copy = {
+                    ...divida,
+                    vencimento: dataCopy.toISOString().split('T')[0],
+                    recorrencia: 0
+                };
+                const savedCopy = await salvarDivida(copy);
+                if (savedCopy) dividas.push(savedCopy);
+            }
+        }
+    }
+
+    document.getElementById('dividaDesc').value = '';
+    document.getElementById('dividaValor').value = '';
+    document.getElementById('dividaVenc').value = '';
+    document.getElementById('dividaRecorrencia').value = '';
+
+    await carregarDados();
+    atualizarUI();
+}
+
+// ============================================
+//  EVENTOS E INICIALIZAÇÃO
+// ============================================
+document.getElementById('addBtn').addEventListener('click', adicionarTransacao);
+document.getElementById('addDividaBtn').addEventListener('click', adicionarDivida);
+
+document.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        const active = document.activeElement;
+        if (active.id === 'descricao' || active.id === 'valor' || active.id === 'recorrencia') {
+            adicionarTransacao();
+        }
+        if (active.id === 'dividaDesc' || active.id === 'dividaValor' || active.id === 'dividaRecorrencia') {
+            adicionarDivida();
+        }
+    }
+});
+
+console.log('💰 Finanças 360 v4 - Versão Compartilhada!');
+console.log('📱 Acesse de qualquer lugar e compartilhe com sua esposa!');
+
+// ============================================
+//  TESTE DE CONEXÃO
+// ============================================
+async function testarConexao() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('usuarios')
+            .select('count');
+
+        if (error) {
+            console.error('❌ Erro de conexão:', error.message);
+            return false;
+        }
+        console.log('✅ Conexão com Supabase funcionando!');
+        return true;
+    } catch (erro) {
+        console.error('❌ Erro ao testar conexão:', erro.message);
+        return false;
+    }
+}
+
+testarConexao();
+</script>
+
 </body>
 </html>
