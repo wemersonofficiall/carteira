@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💰 Finanças 360 - Planilha Compartilhada</title>
+    
+    <!-- BIBLIOTECAS -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  
+
+
+  
+<!-- ========== TELA DE LOGIN ========== -->
+<div id="loginScreen" class="login-container">
+    <div class="login-box">
+        <div class="login-header">
+            <i class="fas fa-wallet"></i>
+            <h2>Finanças 360</h2>
+            <p>Entre para acessar seus dados</p>
+        </div>
+        <div class="login-body">
+            <input type="text" id="loginUsuario" placeholder="Seu nome (ex: João)" />
+            <input type="password" id="loginSenha" placeholder="Crie uma senha" />
+            <button onclick="fazerLogin()" class="btn-login">
+                <i class="fas fa-sign-in-alt"></i> Entrar
+            </button>
+            <p class="login-info">
+                <i class="fas fa-info-circle"></i> Use o mesmo nome para compartilhar dados
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- ========== CONTEÚDO PRINCIPAL ========== -->
+<div id="mainContent" style="display:none;">
+
+<div class="container">
+    
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-left">
+            <h1><i class="fas fa-wallet"></i> Finanças 360</h1>
+            <span class="usuario-info">
+                <i class="fas fa-user"></i> <span id="nomeUsuario">Usuário</span>
+            </span>
+        </div>
+        <div class="header-right">
+            <button class="btn btn-danger btn-sair" onclick="fazerLogout()">
+                <i class="fas fa-sign-out-alt"></i> Sair
+            </button>
+            <div class="saldo-total">
+                <small>Saldo Total</small>
+                <span id="saldoTotal">R$ 0,00</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- CARDS RESUMO -->
+    <div class="cards-grid">
+        <div class="card">
+            <i class="fas fa-arrow-up icone"></i>
+            <h3>Receitas</h3>
+            <div class="valor verde" id="totalReceitas">R$ 0,00</div>
+        </div>
+        <div class="card">
+            <i class="fas fa-arrow-down icone"></i>
+            <h3>Despesas</h3>
+            <div class="valor vermelho" id="totalDespesas">R$ 0,00</div>
+        </div>
+        <div class="card">
+            <i class="fas fa-credit-card icone"></i>
+            <h3>Dívidas</h3>
+            <div class="valor azul" id="totalDividas">R$ 0,00</div>
+        </div>
+        <div class="card">
+            <i class="fas fa-chart-line icone"></i>
+            <h3>Crescimento</h3>
+            <div class="valor" id="crescimentoCard">0%</div>
+        </div>
+        <div class="card">
+            <i class="fas fa-coins icone"></i>
+            <h3>Patrimônio</h3>
+            <div class="valor roxo" id="patrimonio">R$ 0,00</div>
+        </div>
+        <div class="card">
+            <i class="fas fa-hand-holding-usd icone"></i>
+            <h3>Renda Total</h3>
+            <div class="valor ciano" id="rendaTotal">R$ 0,00</div>
+        </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main-grid">
+        
+        <!-- ESQUERDA: LANÇAMENTOS -->
+        <div class="panel">
+            <h2><i class="fas fa-list"></i> Lançamentos</h2>
+            
+            <!-- FORMULÁRIO -->
+            <div class="form-group">
+                <input type="text" id="descricao" placeholder="Descrição" />
+                <input type="number" id="valor" placeholder="Valor (R$)" step="0.01" />
+                <select id="tipo">
+                    <option value="receita">Receita</option>
+                    <option value="despesa">Despesa</option>
+                </select>
+                <select id="categoria">
+                    <option value="Alimentação">Alimentação</option>
+                    <option value="Moradia">Moradia</option>
+                    <option value="Transporte">Transporte</option>
+                    <option value="Lazer">Lazer</option>
+                    <option value="Saúde">Saúde</option>
+                    <option value="Educação">Educação</option>
+                    <option value="Salário">Salário</option>
+                    <option value="Investimento">Investimento</option>
+                    <option value="Outros">Outros</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <select id="classificacao">
+                    <option value="essencial">Gastos Essenciais</option>
+                    <option value="hobby">Hobbies</option>
+                    <option value="investimento">Investimentos</option>
+                    <option value="passivo">Passivos</option>
+                    <option value="ativo">Ativos</option>
+                    <option value="renda">Renda</option>
+                </select>
+                <input type="number" id="recorrencia" placeholder="Meses" min="1" />
+                <button class="btn" id="addBtn"><i class="fas fa-plus"></i> Adicionar</button>
+            </div>
+            
+            <!-- FILTROS -->
+            <div class="filtro-group">
+                <select id="filtroClassificacao">
+                    <option value="todos">Todas Classificações</option>
+                    <option value="essencial">Gastos Essenciais</option>
+                    <option value="hobby">Hobbies</option>
+                    <option value="investimento">Investimentos</option>
+                    <option value="passivo">Passivos</option>
+                    <option value="ativo">Ativos</option>
+                    <option value="renda">Renda</option>
+                </select>
+                <select id="filtroTipo">
+                    <option value="todos">Todos os Tipos</option>
+                    <option value="receita">Receitas</option>
+                    <option value="despesa">Despesas</option>
+                </select>
+                <button class="btn btn-sm" onclick="aplicarFiltros()"><i class="fas fa-filter"></i> Filtrar</button>
+                <button class="btn btn-sm btn-warning" onclick="limparFiltros()"><i class="fas fa-undo"></i> Limpar</button>
+            </div>
+
+            <!-- TABELA -->
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Descrição</th>
+                            <th>Categoria</th>
+                            <th>Classificação</th>
+                            <th>Valor</th>
+                            <th>Tipo</th>
+                            <th>Recorrência</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaBody">
+                        <tr><td colspan="7" class="empty-state">Carregando...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- DIREITA: GRÁFICOS -->
+        <div class="panel">
+            <h2><i class="fas fa-chart-pie"></i> Distribuição</h2>
+            
+            <!-- GRÁFICO PIZZA -->
+            <div class="chart-container">
+                <canvas id="pieChart"></canvas>
+            </div>
+            
+            <!-- GRÁFICO BARRAS -->
+            <div class="chart-container" style="margin-top:20px;">
+                <canvas id="barChart"></canvas>
+            </div>
+            
+            <!-- CRESCIMENTO -->
+            <div class="crescimento">
+                <div class="label">Índice de Crescimento</div>
+                <div class="numero" id="crescimentoIndice">0%</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DÍVIDAS -->
+    <div class="panel" style="margin-bottom: 25px;">
+        <h2><i class="fas fa-hand-holding-usd"></i> Gerenciar Dívidas</h2>
+        <div class="form-group">
+            <input type="text" id="dividaDesc" placeholder="Nome da dívida" />
+            <input type="number" id="dividaValor" placeholder="Valor (R$)" step="0.01" />
+            <input type="date" id="dividaVenc" />
+            <input type="number" id="dividaRecorrencia" placeholder="Meses" min="1" />
+            <select id="dividaStatus">
+                <option value="pendente">Pendente</option>
+                <option value="pago">Pago</option>
+                <option value="atrasado">Atrasado</option>
+            </select>
+            <button class="btn btn-success" id="addDividaBtn"><i class="fas fa-plus"></i> Adicionar</button>
+        </div>
+        <div id="listaDividas"></div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        <i class="fas fa-database"></i> Dados salvos no Supabase • Compartilhado com sua esposa
+    </div>
+</div>
+</div>
+
+<!-- ========== JAVASCRIPT ========== -->
+<script src="script.js"></script>
+
+
+
+
+  
+</body>
+</html>
